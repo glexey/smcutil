@@ -50,7 +50,7 @@ int main()
     for (int i=0; i < num_fans; i++)
 	printf("Fan %d: %d RPM\n", i, get_fan_rpm(i));
     
-    printf("Voltage: %f\n", get_voltage("VC0C"));
+    printf("Voltage: %f\n", get_float("VC0C"));
 
     close_smc();
 

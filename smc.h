@@ -152,6 +152,29 @@ typedef enum {
 } tmp_unit_t;
 
 
+/**
+Defined by AppleSMC.kext. See SMCParamStruct.
+
+These are SMC specific return codes
+*/
+typedef enum {
+    kSMCSuccess     = 0,
+    kSMCError       = 1,
+    kSMCKeyNotFound = 0x84
+} kSMC_t;
+
+
+/**
+Used for returning data from the SMC.
+*/
+typedef struct {
+    uint8_t  data[32];
+    uint32_t dataType;
+    uint32_t dataSize;
+    kSMC_t   kSMC;
+} smc_return_t;
+
+
 //------------------------------------------------------------------------------
 // MARK: PROTOTYPES
 //------------------------------------------------------------------------------
@@ -196,6 +219,7 @@ double get_tmp(char *key, tmp_unit_t unit);
 
 // AAG
 double get_voltage(char *key);
+double get_float(char *key);
 
 /**
 Is the machine being powered by the battery?
@@ -254,3 +278,5 @@ WARNING: You are playing with hardware here, BE CAREFUL.
 :return: True if successful, false otherwise
 */
 bool set_fan_min_rpm(unsigned int fan_num, unsigned int rpm, bool auth);
+
+kern_return_t read_smc(char *key, smc_return_t *result_smc);

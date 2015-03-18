@@ -103,17 +103,6 @@ static const int DATA_TYPE_SIZE = 4;
 //------------------------------------------------------------------------------
 
 
-/**
-Defined by AppleSMC.kext. See SMCParamStruct.
-
-These are SMC specific return codes
-*/
-typedef enum {
-    kSMCSuccess     = 0,
-    kSMCError       = 1,
-    kSMCKeyNotFound = 0x84
-} kSMC_t;
-
 
 /**
 Defined by AppleSMC.kext. See SMCParamStruct.
@@ -198,16 +187,6 @@ typedef struct {
     uint8_t        bytes[32];
 } SMCParamStruct;
 
-
-/**
-Used for returning data from the SMC.
-*/
-typedef struct {
-    uint8_t  data[32];
-    uint32_t dataType;
-    uint32_t dataSize;
-    kSMC_t   kSMC;
-} smc_return_t;
 
 
 //------------------------------------------------------------------------------
@@ -356,7 +335,7 @@ Read data from the SMC
 
 :param: key The SMC key
 */
-static kern_return_t read_smc(char *key, smc_return_t *result_smc)
+kern_return_t read_smc(char *key, smc_return_t *result_smc)
 {
     kern_return_t result;
     SMCParamStruct inputStruct;
@@ -611,6 +590,27 @@ double get_voltage(char* key)
     printf("\n");
 
     return(1.0*(result_smc.data[0]*256+result_smc.data[1])/16384);
+}
+
+double get_float(char* key)
+{
+    kern_return_t result;
+    smc_return_t  result_smc;
+    char* type;
+    
+    result = read_smc(key, &result_smc);
+
+    if (!(result == kIOReturnSuccess))
+        printf("ERROR: result=%d\n", result);
+    
+    type = (char*)&result_smc.dataType;
+    if (!(type[3] == 'f' || type[3] == 's') || !(type[2] == 'p')) printf("ERROR: %s, datatype: %c%c%c%c\n", key, type[3], type[2], type[1], type[0]);
+    int frac = 0;
+    char f = type[0];
+    if (f <= '9') frac = f - '0';
+    else if (f <= 'Z') frac = 10 + f - 'A';
+    else if (f <= 'z') frac = 10 + f - 'a';
+    return(1.0*(result_smc.data[0]*256+result_smc.data[1])/(1<<frac));
 }
 
 
