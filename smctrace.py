@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from time import sleep
-from subprocess import check_call as call
+import time
+from subprocess import check_output as call
 
 known_ones = {
    'A': 'Ambient',
@@ -74,10 +74,12 @@ DEFAULT_LIST = [
 def main():
    a = DEFAULT_LIST
    headers = [key2header(x) for x in a]
-   print ','.join(headers)
+   print ','.join(['time'] + headers)
+   start = time.time()
    while True:
-      call(['./smcprint'] + a)
-      sleep(1)
+      s = call(['./smcprint'] + a)
+      print "%f,%s"%(time.time()-start, s.strip())
+      time.sleep(.5)
 
 main()
 
