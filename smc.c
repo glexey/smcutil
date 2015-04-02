@@ -414,7 +414,7 @@ static kern_return_t write_smc(char *key, smc_return_t *result_smc)
     inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize;
 
     // Set data to write
-    memcpy(outputStruct.bytes, result_smc->data, sizeof(result_smc->data));
+    memcpy(inputStruct.bytes, result_smc->data, sizeof(result_smc->data));
 
     result = call_smc(&inputStruct, &outputStruct);
     result_smc->kSMC = outputStruct.result;
@@ -569,28 +569,6 @@ bool is_optical_disk_drive_full(void)
 }
 
 // AAG
-double get_voltage(char* key)
-{
-    kern_return_t result;
-    smc_return_t  result_smc;
-    char type[] = "four";
-    
-    result = read_smc(key, &result_smc);
-
-    if (!(result == kIOReturnSuccess))
-        printf("ERROR: result=%d\n", result);
-    
-    printf("result_smc.dataSize=%d\n", result_smc.dataSize);
-    for (int i=0; i<4; i++)
-        type[i] = ((char*)&result_smc.dataType)[3-i];
-    printf("result_smc.dataType=%s\n", type);
-    printf("result_smc.data=");
-    for (int i=0; i<result_smc.dataSize; i++)
-        printf("%d ", result_smc.data[i]);
-    printf("\n");
-
-    return(1.0*(result_smc.data[0]*256+result_smc.data[1])/16384);
-}
 
 double get_float(char* key)
 {
@@ -698,22 +676,18 @@ unsigned int get_fan_rpm(unsigned int fan_num)
 }
 
 
-bool set_fan_min_rpm(unsigned int fan_num, unsigned int rpm, bool auth)
+bool set_fan_min_rpm(unsigned int fan_num, unsigned int rpm)
 {
-    // TODO: Add rpm val safety check
     char key[5];
     bool ans = false;
     kern_return_t result;
     smc_return_t  result_smc;
 
-    memset(&result_smc, 0, sizeof(smc_return_t));
-
-    // TODO: Don't use magic number
-    result_smc.dataSize = 2;
-    result_smc.dataType = to_uint32_t(DATA_TYPE_FPE2); 
-    to_fpe2(rpm, result_smc.data);
-
     sprintf(key, "F%dMn", fan_num);
+
+    result = read_smc(key, &result_smc);
+
+    to_fpe2(rpm, result_smc.data);
     result = write_smc(key, &result_smc);
 
     if (result == kIOReturnSuccess && result_smc.kSMC == kSMCSuccess) {
