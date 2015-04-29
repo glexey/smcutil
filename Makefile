@@ -9,6 +9,7 @@ LIB_DY     = libsmc.dylib
 exe: static
 	${CC} ${CFLAGS} ${FRAMEWORKS} -o smcprint smcprint.c ${LIB}
 	${CC} ${CFLAGS} ${FRAMEWORKS} -o smcdump smcdump.c ${LIB}
+	${CC} ${CFLAGS} ${FRAMEWORKS} -o smcrpm smcrpm.c ${LIB}
 
 exe_dy: dynamic
 	${CC} ${CFLAGS} -o smcprint smcprint.c ${LIB_DY}

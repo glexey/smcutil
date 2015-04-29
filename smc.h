@@ -218,7 +218,6 @@ Get the current temperature from a sensor
 double get_tmp(char *key, tmp_unit_t unit);
 
 // AAG
-double get_voltage(char *key);
 double get_float(char *key);
 
 /**
@@ -277,6 +276,6 @@ WARNING: You are playing with hardware here, BE CAREFUL.
 :param: auth Should the function do authentication?
 :return: True if successful, false otherwise
 */
-bool set_fan_min_rpm(unsigned int fan_num, unsigned int rpm, bool auth);
+bool set_fan_min_rpm(unsigned int fan_num, unsigned int rpm);
 
 kern_return_t read_smc(char *key, smc_return_t *result_smc);

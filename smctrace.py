@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
-from time import sleep
-from subprocess import check_call as call
+import os
+import time
+import signal
+from subprocess import check_output as call
 
 known_ones = {
    'A': 'Ambient',
@@ -71,13 +73,23 @@ DEFAULT_LIST = [
    'IH0R', 'II0R',
 ]
 
+exit_requested = False
+
+def ctrlc_handler(signum, frame):
+   global exit_requested
+   exit_requested = True
+
 def main():
+   mypath = os.path.dirname(os.path.realpath(__file__))
+   signal.signal(signal.SIGINT, ctrlc_handler)
    a = DEFAULT_LIST
    headers = [key2header(x) for x in a]
-   print ','.join(headers)
-   while True:
-      call(['./smcprint'] + a)
-      sleep(1)
+   print ','.join(['time'] + headers)
+   start = time.time()
+   while True and not exit_requested:
+      s = call(['%s/smcprint'%mypath] + a)
+      print "%f,%s"%(time.time()-start, s.strip())
+      time.sleep(.5)
 
 main()
 
